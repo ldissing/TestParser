@@ -1,0 +1,32 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="TestPTStopLosses.MainWindow"
+        xmlns:local="clr-namespace:DictionaryDataGridDemo"
+        Title="MainWindow" Height="737.9" Width="1229.8">
+    <Window.DataContext>
+        <local:SingleDictViewModel />
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="368*"/>
+            <RowDefinition Height="339*"/>
+        </Grid.RowDefinitions>
+        <Menu Height="20" VerticalAlignment="Top" HorizontalAlignment="Stretch"  Margin="10,0,0,0">
+            <MenuItem x:Name="Parse" Foreground="Black" Background="White" InputGestureText="What" Header="ParseFiles" Click="File_Click"/>
+            <MenuItem x:Name="ProcessPTSL" Foreground="Black" Background="White" InputGestureText="What" Header="ProcessPTSL" Click="ProcessPTSL_Click"/>
+        </Menu>
+        <DataGrid Name="Trades" HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  ItemsSource="{Binding dt}" Margin="10,108,3,10" ClipboardCopyMode="IncludeHeader" IsTextSearchCaseSensitive="True" LoadingRow="Trades_LoadingRow" Grid.RowSpan="2"/>
+        <Label Content="Winners"  HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" Width="57"/>
+        <Label Content="0" Name="Winners_Val" HorizontalAlignment="Left" Margin="86,20,0,0" VerticalAlignment="Top" Width="57"/>
+        <Label Content="Losers"  HorizontalAlignment="Left" Margin="148,20,0,0" VerticalAlignment="Top" Width="57"/>
+        <Label Content="0" x:Name="Losers_Val" HorizontalAlignment="Left" Margin="210,20,0,0" VerticalAlignment="Top" Width="57"/>
+        <Label Content="%"  HorizontalAlignment="Left" Margin="272,20,0,0" VerticalAlignment="Top" Width="23"/>
+        <Label Content="0" x:Name="Percent_Val" HorizontalAlignment="Left" Margin="300,20,0,0" VerticalAlignment="Top" Width="41" RenderTransformOrigin="-0.018,0.615"/>
+        <Label Content="Profit"  HorizontalAlignment="Left" Margin="346,20,0,0" VerticalAlignment="Top" Width="40"/>
+        <Label Content="0" x:Name="Profit_Val" HorizontalAlignment="Left" Margin="391,20,0,0" VerticalAlignment="Top" Width="116" RenderTransformOrigin="-0.018,0.615"/>
+        <DataGrid HorizontalAlignment="Left" Margin="341,225,0,0" VerticalAlignment="Top"/>
+    </Grid>
+</Window>
