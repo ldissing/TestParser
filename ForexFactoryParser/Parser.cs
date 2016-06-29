@@ -18,9 +18,11 @@ namespace ForexFactoryParser
         {
             string ret = "";
             if (data.ContainsKey("Time"))
-                ret += data["Time"] + "\t ";
+                ret += data["Time"] + "  ";
             if (data.ContainsKey("Impact"))
-                ret += data["Impact"] + "\t ";
+                ret += data["Impact"][0] + "\t";
+            if (data.ContainsKey("Currency"))
+                ret += data["Currency"] + "\t";
             if (data.ContainsKey("Event"))
                 ret += data["Event"] + " ";
             if (data.ContainsKey("Previous"))
@@ -419,8 +421,147 @@ public class TokensWalker
 
         NewsItem ParseCalendarRow(StringReader MyReader)
         {
-            NewsItem item = new NewsItem();
+            
+            for (int i = 0; i < tokens.Count; i++ )
+            {
+                if (tokens[i].Name.Contains("DataToken") || tokens[i].Name.Contains("KeyToken"))
+                {
 
+                }
+                else
+                {
+                    tokens.RemoveAt(i--);
+                }
+            }
+            string key="";
+            string value = "";
+            NewsItem item1 = new NewsItem();
+                while (tokens.Count > 0)
+                {
+                    if (tokens[0].Name.Contains("KeyToken"))
+                    {
+                        key = tokens[0].Value;
+                    }
+                        
+                    if (key.Contains("calendar__event-title"))
+                    {
+                        if (tokens[0].Name.Contains("DataToken"))
+                        {
+                            value = tokens[0].Value;
+                            item1.data.Add("Event", value);
+                        }
+                    }
+                    if (key.Contains("calendar__actual"))
+                    {
+                        if (tokens[0].Name.Contains("DataToken"))
+                        {
+                            value = tokens[0].Value;
+                            item1.data.Add("Actual", value);
+                        }
+                    }
+                    if (key.Contains("calendar__forecast"))
+                    {
+                        if (tokens[0].Name.Contains("DataToken"))
+                        {
+                            value = tokens[0].Value;
+                            item1.data.Add("Forecast", value);
+                        }
+                    }
+                    if (key.Contains("calendar__impact"))
+                    {
+                        if (item1.data.ContainsKey("Impact") == false)
+                        {
+                            if (key.Contains("medium"))
+                                item1.data.Add("Impact", "Medium");
+                            else if (key.Contains("high"))
+                                item1.data.Add("Impact", "High");
+                            else if (key.Contains("low"))
+                                item1.data.Add("Impact", "Low");
+                        }
+                        key = "";
+                    }
+                    if (key.Contains("calendar__previous"))
+                    {
+                        if (tokens[0].Name.Contains("DataToken"))
+                        {
+                            value = tokens[0].Value;
+                            item1.data.Add("Previous", value);
+                        }
+                    }
+                    if (key.Contains("calendar__currency"))
+                    {
+                        if (tokens[0].Name.Contains("DataToken"))
+                        {
+                            value = tokens[0].Value;
+                            item1.data.Add("Currency", value);
+                        }
+                    }
+                    if (key.Contains("calendar__time"))
+                    {
+                        if (tokens[0].Name.Contains("DataToken"))
+                        {
+                            value = tokens[0].Value;
+                            value = value.ToLower();
+                            if (value.Contains("am") || value.Contains("pm"))
+                            {
+                                // figure out where we should be timewise for our timezone
+                                string temp = "";
+                                for (int i = 0; i < value.Length; i++)
+                                    if (Char.IsDigit(value[i]))
+                                        temp += value[i];
+
+                                string leftOver = value.Substring(temp.Length + 1);
+                                Regex regexTime = new Regex("[^0-9]+");
+                                int time = -1;
+                                try
+                                {
+                                    time = Convert.ToInt16(regexTime.Replace(value, ""));
+                                }
+                                catch (Exception)
+                                {
+                                }
+                                if (time != -1)
+                                {
+                                    if (value.IndexOf("pm") > 0)
+                                    {
+                                        if (time < 1200)
+                                        {
+                                            time += 1200;
+                                        }
+                                    }
+                                    else if (time > 1200)
+                                    {
+                                        time -= 1200;
+                                    }
+                                    DateTime dt = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, time / 100, time % 100, 0);
+                                    dt = dt.AddHours(_offsetToEst);
+                                    value = string.Format("{0:hh:mm tt}", dt);
+                                    prevTime = dt;
+                                    item1.time = dt;
+                                }
+                                item1.data.Add("Time", value);
+                            }
+                            else
+                            {
+                                if (prevTime != DateTime.MinValue && value == "")
+                                {
+                                    value = string.Format("{0:hh:mm tt}", prevTime);
+                                    item1.data.Add("Time", value);
+                                    item1.time = prevTime;
+                                }
+                                else
+                                {
+                                    DateTime dt = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
+                                    value = string.Format("{0:hh:mm tt}", dt);
+                                    item1.data.Add("Time", value);
+                                }
+                            }
+                        }
+                    }
+                    tokens.RemoveAt(0);
+                }
+                return item1;
+                NewsItem item = new NewsItem();
             //<tr class=\"calendar__row
             //</tr>
             var sb = new StringBuilder();
@@ -474,7 +615,7 @@ public class TokensWalker
                                         {
                                             string tdClass = ReadUpToText(tdreader, "class=\"calendar__cell ");
                                             tdClass = ReadUntilWhiteSpace(tdreader);
-                                            string value = "";
+                                            value = "";
                                             string span = "";
                                             if (tdreader.Peek() == -1 || tdClass == "")
                                                 continue;
@@ -646,9 +787,9 @@ public class TokensWalker
                 if (c == '<')
                 {
                     _reader.Read();
-                    if (data.Length > 1)
+                    if (data.Length > 1 && data[0] != '&')
                     {
-                           tokens.Add(new DataToken(data));
+                        tokens.Add(new DataToken(data));
                     }
                     data = "";
 
@@ -706,7 +847,7 @@ public class TokensWalker
                 }
                 else if (c == '>')
                 {
-                    if (data.Length > 1)
+                    if (data.Length > 1 && data[0] != '&')
                     {
                         if (tokens.Count > 0)
                         {
@@ -717,7 +858,7 @@ public class TokensWalker
                             else
                                 tokens.Add(new DataToken(data));
                         }
-                        else
+                        else if (data[0] != '&')
                             tokens.Add(new DataToken(data));
                     }
                     data = "";
@@ -755,7 +896,7 @@ public class TokensWalker
                                             using (StringReader newReader = new StringReader(temp))
                                             {
                                                 NewsItem newitem = ParseCalendarRow(newReader);
-                                                if (newitem.data.Count > 0)
+                                                if (newitem.ToString() != "")
                                                 {
                                                     _newstokens.Add(new NewsItemToken(newitem));
                                                 }
@@ -786,7 +927,7 @@ public class TokensWalker
                 {
                     if (tokens.Count > 0 && tokens[tokens.Count - 1].Name.Contains("LessThanToken"))
                     {
-                        if (data.Length > 1)
+                        if (data.Length > 1 && data[0] != '&')
                             tokens.Add(new DataToken(data));
                         data = "";
                         tokens.Add(new ForwardSlashToken());
@@ -804,6 +945,7 @@ public class TokensWalker
                     //throw new Exception("Unknown character in expression: " + c);
                 }
             }
+            tokens.Clear();
             foreach (Token t in _newstokens)
                 tokens.Add(t);
             return tokens;

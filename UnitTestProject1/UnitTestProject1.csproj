@@ -95,6 +95,10 @@
       <Project>{eababff5-fc94-41bd-abc1-a3a26bd9d493}</Project>
       <Name>ArithmeticExpressionParser</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ForexFactoryParser\ForexFactoryParser.csproj">
+      <Project>{7a3ad1d0-3e56-44fe-931a-d8e49943ce34}</Project>
+      <Name>ForexFactoryParser</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
