@@ -31,7 +31,7 @@ namespace UnitTestProject1
          [TestMethod]
          public void TestNews()
          {
-             string[] files = Directory.GetFiles(@"C:\DimensionTrader\EDR.Daily\News\ForexFactory", "160628.htm");
+             string[] files = Directory.GetFiles(@"C:\DimensionTrader\EDR.Daily\News\ForexFactory", "160629.htm");
              ForexFactoryParser.Parser p = null;
              try
              {

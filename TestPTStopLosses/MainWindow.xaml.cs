@@ -106,7 +106,7 @@ namespace DictionaryDataGridDemo
             //{
             //    MyDictionary = p.OrderDict;
             //}
-            using (StreamReader sr = new StreamReader(@"NinjaTrader Trade List.csv"))
+            using (StreamReader sr = new StreamReader(@"c:\results\NinjaTrader Trade List.csv"))
             {
                 string header = "";
                 string[] headerBits = null;
