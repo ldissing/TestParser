@@ -7,6 +7,7 @@ using System.Linq;
 using System.IO;
 
 using Tokens;
+using System.Net;
 
 namespace UnitTestProject1
 {
@@ -31,19 +32,21 @@ namespace UnitTestProject1
          [TestMethod]
          public void TestNews()
          {
-             string[] files = Directory.GetFiles(@"C:\DimensionTrader\EDR.Daily\News\ForexFactory", "160629.htm");
-             ForexFactoryParser.Parser p = null;
-             try
-             {
-                 foreach (string f in files)
-                 {
-                     if (p == null)
-                         p = new ForexFactoryParser.Parser(f);
-                     else
-                         p = new ForexFactoryParser.Parser(f);
-                 }
-             }
-             catch { }
+             String url = String.Format("http://www.forexfactory.com/calendar.php?do=geteventinfo&day={0:D}-{1:D}-{2:D}&c=2", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+             WebClient Client = new WebClient();
+             string data = Client.DownloadString(url);
+             ForexFactoryParser.ForexFactoryParser p = new ForexFactoryParser.ForexFactoryParser(data, true);
+             //try
+             //{
+             //    foreach (string f in files)
+             //    {
+             //        if (p == null)
+             //            p = new ForexFactoryParser.ForexFactoryParser(f);
+             //        else
+             //            p = new ForexFactoryParser.ForexFactoryParser(f);
+             //    }
+             //}
+             //catch { }
              if (p != null)
                  foreach (string ni in p.NewsDict.Keys)
                  {

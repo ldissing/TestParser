@@ -17,8 +17,9 @@ namespace ForexFactoryParser
         public override string ToString()
         {
             string ret = "";
-            if (data.ContainsKey("Time"))
-                ret += data["Time"] + "  ";
+            string value = string.Format("{0:hh:mm tt}", time);
+            //if (data.ContainsKey("Time"))
+                ret += value + "  ";
             if (data.ContainsKey("Impact"))
                 ret += data["Impact"][0] + "\t";
             if (data.ContainsKey("Currency"))
@@ -41,7 +42,7 @@ namespace ForexFactoryParser
     /// <summary>
     /// This parser sucks.  Could be done much better, but I'm not getting paid for it.
     /// </summary>
-    public class Parser
+    public class ForexFactoryParser
     {
         private string _expression;
         private TokensWalker _walker;
@@ -53,19 +54,36 @@ namespace ForexFactoryParser
             get { return _newsDict; }
             set { _newsDict = value; }
         }
-       
-        public Parser(string file)
+        public ForexFactoryParser(string expression, bool isData)
         {
-            ParseFile(file);
+            ParseFile(expression);
         }
-        protected void ParseFile(string file)
+        /// <summary>
+        /// pass in a file name
+        /// </summary>
+        /// <param name="file"></param>
+        public ForexFactoryParser(string file)
         {
-            _timeOffsetFromEastern = TimeZoneDiff();
+            string expression = "";
             using (StreamReader sr = new StreamReader(file))
             {
-                while (sr.EndOfStream == false)
+                expression = sr.ReadToEnd();
+                
+            }
+            ParseFile(expression);
+        }
+        /// <summary>
+        /// pass in the data (string) to parse
+        /// </summary>
+        /// <param name="expression"></param>
+        protected void ParseFile(string expression)
+        {
+            _timeOffsetFromEastern = TimeZoneDiff();
+            //using (StreamReader sr = new StreamReader(file))
+            {
+                //while (sr.EndOfStream == false)
                 {
-                    string expression = sr.ReadToEnd();
+                    //string expression = sr.ReadToEnd();
                     _expression = expression;
                     var tokens = new Tokenizer().Scan(_expression);
                     var list = tokens.ToList();
@@ -109,7 +127,7 @@ namespace ForexFactoryParser
             }
 
         }
-        public Parser(string file, Dictionary<string, NewsItem> newsDictIn)
+        public ForexFactoryParser(string file, Dictionary<string, NewsItem> newsDictIn)
         {
             if (newsDictIn != null)
                 _newsDict = newsDictIn;
@@ -194,40 +212,13 @@ namespace ForexFactoryParser
             }
         }
     }
-    public class TDToken : Token
-    {
-        public override string Value
-        {
-            get { return "td"; }
-        }
-    }
-    public class SpanToken : Token
-    {
-        public override string Value
-        {
-            get { return "span"; }
-        }
-    }
-    public class AToken : Token
-    {
-        public override string Value
-        {
-            get { return "a"; }
-        }
-    }
     public class TypeToken : DataToken
     {
         public TypeToken(string type) : base(type)
         {
         }
     }
-    public class DivToken : Token
-    {
-        public override string Value
-        {
-            get { return "div"; }
-        }
-    }
+   
     public class TRToken : Token
     {
         public override string Value
@@ -436,10 +427,13 @@ public class TokensWalker
             string key="";
             string value = "";
             NewsItem item1 = new NewsItem();
+            item1.time = prevTime;
+            value = string.Format("{0:hh:mm tt}", prevTime);
                 while (tokens.Count > 0)
                 {
                     if (tokens[0].Name.Contains("KeyToken"))
                     {
+                        if (tokens[0].Value.Contains("calendar"))
                         key = tokens[0].Value;
                     }
                         
