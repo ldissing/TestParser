@@ -122,7 +122,7 @@ namespace ArithmeticExpressionParser
     public class Parser
     {
         private string _expression;
-        private TokensWalker _walker;
+       private TokensWalker _walker;
 
         Dictionary<string, CompletedOrders> orderDict = new Dictionary<string, CompletedOrders>();
 

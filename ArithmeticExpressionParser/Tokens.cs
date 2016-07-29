@@ -124,7 +124,7 @@ namespace Tokens
             return ret;
         }
         protected Dictionary<string, string> _dict = new Dictionary<string, string>();
-        public string Name
+        public override string Name
         {
             get {
                 if (_dict.ContainsKey("Name"))
