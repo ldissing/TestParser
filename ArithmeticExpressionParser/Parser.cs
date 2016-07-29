@@ -158,15 +158,13 @@ namespace ArithmeticExpressionParser
                     var list = tokens.ToList();
                     if (list.Count >= 2)
                     {
-                        TokensWalker walker = new TokensWalker(tokens);
-                        bool bPrinted = false;
-                        
-                        while (walker.ThereAreMoreTokens)
+                        _walker = new TokensWalker(tokens);
+                        while (_walker.ThereAreMoreTokens)
                         {
-                            Token t = walker.GetNext();
-                            if (walker.ThereAreMoreTokens)
+                            Token t = _walker.GetNext();
+                            if (_walker.ThereAreMoreTokens)
                             {
-                                Token nextT = walker.PeekNext();
+                                Token nextT = _walker.PeekNext();
                                 //if ((nextT as WordToken) != null || (nextT as OrdersToken) != null)
                                 {
                                     OrdersToken ot = nextT as OrdersToken;
@@ -224,15 +222,11 @@ namespace ArithmeticExpressionParser
                                     }
                                     
                                 }
-                                //else
-                                //    break;
+                               
                             }
-                            bPrinted = true;
-                            //Console.Write(t.ToString());
-                            //Console.Write(" ");
+                            
                         }
-                        //if (bPrinted)
-                        //    Console.Write("\n");
+                        
                     }
                 }
             }

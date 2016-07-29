@@ -177,7 +177,7 @@ namespace ArithmeticExpressionParser
                         case "PMtf":
                             tokens.Add(new PMTFToken(word));
                             return tokens;
-                            break;
+                           
                         case "order":
                             if (((char)_reader.Peek() == ':'))
                                 _reader.Read();  // reads the next ':'
@@ -270,7 +270,7 @@ namespace ArithmeticExpressionParser
                             RemoveTokens(tokens, typeof(TradeDateTimeToken));
                             tokens.Add(new ProcessHistoricalToken(word));
                             return tokens;
-                            break;
+                           
                         case "US":
                             word += ReadAllButEqual();
                             string name = word;
@@ -279,7 +279,7 @@ namespace ArithmeticExpressionParser
                             RemoveTokens(tokens, typeof(TradeDateTimeToken));
                             tokens.Add(new StartEndTimeToken(name, word));
                             return tokens;
-                            break;
+                            
                         case "Daily":
                             _reader.Read();
                             string newword = ParseWord();

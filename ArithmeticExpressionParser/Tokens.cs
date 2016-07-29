@@ -324,7 +324,7 @@ namespace Tokens
         {
             _name = name;
         }
-        public virtual string Name
+        public override string Name
         {
             get { return _name; }
         }

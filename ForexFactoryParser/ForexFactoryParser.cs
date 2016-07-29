@@ -89,15 +89,14 @@ namespace ForexFactoryParser
                     var list = tokens.ToList();
                     if (list.Count >= 2)
                     {
-                        TokensWalker walker = new TokensWalker(tokens);
-                        bool bPrinted = false;
-                        
-                        while (walker.ThereAreMoreTokens)
+                        _walker = new TokensWalker(tokens);
+
+                        while (_walker.ThereAreMoreTokens)
                         {
-                            Token t = walker.GetNext();
-                            if (walker.ThereAreMoreTokens)
+                            Token t = _walker.GetNext();
+                            if (_walker.ThereAreMoreTokens)
                             {
-                                Token nextT = walker.PeekNext();
+                                Token nextT = _walker.PeekNext();
                                 //if ((nextT as WordToken) != null || (nextT as OrdersToken) != null)
                                 {
                                     NewsItemToken ot = nextT as NewsItemToken;
@@ -116,8 +115,6 @@ namespace ForexFactoryParser
                                 //else
                                 //    break;
                             }
-                            bPrinted = true;
-                            //Console.Write(t.ToString());
                             //Console.Write(" ");
                         }
                         //if (bPrinted)
@@ -280,7 +277,7 @@ namespace ForexFactoryParser
             _value = value;
         }
 
-        public NewsItem Value
+        public new NewsItem Value
         {
             get { return _value; }
         }
@@ -306,7 +303,7 @@ namespace ForexFactoryParser
             _value = value;
         }
 
-        public double Value
+        public new double Value
         {
             get { return _value; }
         }
@@ -555,215 +552,6 @@ public class TokensWalker
                     tokens.RemoveAt(0);
                 }
                 return item1;
-                NewsItem item = new NewsItem();
-            //<tr class=\"calendar__row
-            //</tr>
-            var sb = new StringBuilder();
-
-            while (((char)MyReader.Peek() == '<' || (char)MyReader.Peek() == 't') || (char)MyReader.Peek() == 'r')
-            {
-                sb.AppendFormat("{0}", ((char)MyReader.Read()).ToString());
-                char next = (char)MyReader.Peek();
-            }
-            char c = (char)MyReader.Peek();
-            string tr = string.Empty;
-            if (sb.ToString().Contains("<tr"))
-            {
-                string trType = ReadUntilWhiteSpace(MyReader);
-                if (trType == "")
-                {
-                    char next = (char)MyReader.Read();
-                    string classType = ReadAllButEqual(MyReader);
-                    if (classType.ToLower().Contains("class"))
-                    {
-                        MyReader.Read(); // read =
-                        string type = ReadUntilWhiteSpace(MyReader);
-                        if (type.ToLower().Contains("calendar__row"))
-                        {
-                            string name = ReadUpToText(MyReader, ">"); // read until >,  pull off the crap we don't need
-                            ReadWhiteSpace(MyReader);
-                            tr = ReadToEnd(MyReader);
-                            if (tr.Contains("<tr"))
-                            {
-                                tr += ReadUpToText(MyReader, "</tr>");
-                            }
-                            item.tr = tr;
-                            StringReader trreader = new StringReader(tr);
-                            // parse the tr
-                            bool bContinue = true;
-                            while(bContinue)
-                            {
-                                string td = ReadUpToText(trreader, "<td");
-                                td += ReadUpToText(trreader, "</td>");
-                                
-                                if (td.Contains("</tr>") || td == "")
-                                    break;
-                                else
-                                {
-                                    item.td.Add(td);
-                                    // process the td
-                                    if (td.Contains("class=") || td.Contains("<span") || td.Contains("<a"))
-                                    using(StringReader tdreader = new StringReader(td))
-                                    {
-                                        while (tdreader.Peek() != -1)
-                                        {
-                                            string tdClass = ReadUpToText(tdreader, "class=\"calendar__cell ");
-                                            tdClass = ReadUntilWhiteSpace(tdreader);
-                                            value = "";
-                                            string span = "";
-                                            if (tdreader.Peek() == -1 || tdClass == "")
-                                                continue;
-                                            switch(tdClass)
-                                            {
-                                                case "calendar__previous":
-                                                    if (td.Contains("span"))
-                                                    {
-                                                        span = ReadUpToText(tdreader, "<span ");
-                                                        value = ReadUpToText(tdreader, ">");
-                                                        value = ReadUntil(tdreader, '<');
-                                                    }
-                                                    else
-                                                    {
-                                                        value = ReadUpToText(tdreader, ">");
-                                                        value = ReadUntil(tdreader, '<');
-                                                    }
-                                                    if (value != "")
-                                                    item.data.Add("Previous", value);
-                                                    break;
-                                                case "calendar__forecast":
-                                                    if (td.Contains("span"))
-                                                    {
-                                                        span = ReadUpToText(tdreader, "<span ");
-                                                        value = ReadUpToText(tdreader, ">");
-                                                        value = ReadUntil(tdreader, '<');
-                                                    }
-                                                    else
-                                                    {
-                                                        value = ReadUpToText(tdreader, ">");
-                                                        value = ReadUntil(tdreader, '<');
-                                                    }
-                                                    if (value != "")
-                                                        item.data.Add("Forecast", value);
-                                                    break;
-                                                case "calendar__actual":
-                                                    if (td.Contains("span"))
-                                                    {
-                                                        span = ReadUpToText(tdreader, "<span ");
-                                                        value = ReadUpToText(tdreader, ">");
-                                                        value = ReadUntil(tdreader, '<');
-                                                    }
-                                                    else
-                                                    {
-                                                        value = ReadUpToText(tdreader, ">");
-                                                        value = ReadUntil(tdreader, '<');
-                                                    }
-                                                    if (value != "")
-                                                        item.data.Add("Actual", value);
-                                                    break;
-                                                //case "calendar__date":
-                                                //    span = ReadUpToText(tdreader, "<span>");
-                                                //    value = ReadUpToText(tdreader, ">");
-                                                //    item.data.Add("Date", value);
-                                                //    break;
-                                                case "calendar__event":
-                                                    span = ReadUpToText(tdreader, "<span ");
-                                                    value = ReadUpToText(tdreader, ">");
-                                                    value = ReadUntil(tdreader, '<');
-                                                    item.data.Add("Event", value);
-                                                    break;
-                                                case "calendar__time":
-                                                    if (td.Contains("span"))
-                                                    {
-                                                        span = ReadUpToText(tdreader, "<span ");
-                                                        value = ReadUpToText(tdreader, ">");
-                                                        value = ReadUntil(tdreader, '<');
-                                                    }
-                                                    else
-                                                    {
-                                                        value = ReadUpToText(tdreader, ">");
-                                                        value = ReadUntil(tdreader, '<');
-                                                    }
-                                                    value = value.ToLower();
-                                                    if (value.Contains("am") || value.Contains("pm"))
-                                                    {
-                                                        // figure out where we should be timewise for our timezone
-                                                        string temp = "";
-                                                        for(int i =0; i < value.Length; i++)
-                                                            if (Char.IsDigit(value[i]))
-                                                                temp += value[i];
-
-                                                        string leftOver = value.Substring(temp.Length+1);
-                                                        Regex regexTime = new Regex("[^0-9]+");	
-                                                        int time = -1;
-                                                        try {
-											                time = Convert.ToInt16(regexTime.Replace(value, ""));
-										                }
-										                catch (Exception ) {
-										                }
-										                if (time != -1) {
-											                if (value.IndexOf("pm") > 0) {
-												                if (time < 1200) {
-													                time += 1200;
-												                }
-											                }
-											                else if (time > 1200) {
-												                time -= 1200;
-											                }
-											                DateTime dt = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, time / 100, time % 100, 0);
-											                dt = dt.AddHours(_offsetToEst);
-                                                            value = string.Format("{0:hh:mm tt}", dt);
-                                                            prevTime = dt;
-                                                            item.time = dt;
-										                }
-                                                        item.data.Add("Time", value);
-                                                    }
-                                                    else
-                                                    {
-                                                        if (prevTime != DateTime.MinValue && value == "")
-                                                        {
-                                                            value = string.Format("{0:hh:mm tt}", prevTime);
-                                                            item.data.Add("Time", value);
-                                                            item.time = prevTime;
-                                                        }
-                                                        else
-                                                        {
-                                                            DateTime dt = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
-                                                            value = string.Format("{0:hh:mm tt}", dt);
-                                                            item.data.Add("Time", value);
-                                                        }
-                                                    }
-                                                    
-                                                    break;
-                                                case "calendar__currency":
-                                                    value = ReadUpToText(tdreader, ">");
-                                                    value = ReadUntil(tdreader, '<');
-                                                    item.data.Add("Currency", value);
-                                                    break;
-                                                case "calendar__impact":
-                                                    value = ReadUpToText(tdreader, "<");
-                                                    if (value.Contains("medium"))
-                                                        item.data.Add("Impact", "Medium");
-                                                    else if (value.Contains("high"))
-                                                        item.data.Add("Impact", "High");
-                                                    else if (value.Contains("low"))
-                                                        item.data.Add("Impact", "Low");
-                                                    break;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            
-                            
-                        }
-                    }
-
-                }
-                sb.AppendFormat("{0}", trType);
-            }
-            sb.AppendFormat("{0}", c.ToString());
-            return item;
         }
         public IEnumerable<Token> Scan(string expression)
         {

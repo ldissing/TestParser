@@ -84,7 +84,7 @@ namespace DictionaryDataGridDemo
         {
                 // Default INotifyPropertyChanged
             dt = new DataTable();
-            Parser p = null;
+            
             MyDictionary = new Dictionary<string, CompletedOrders>();
             ProcessedTrades = new Dictionary<string, Results>();
             //string[] files = Directory.GetFiles(@"C:\DimensionTrader\log", "*.txt");
@@ -346,7 +346,7 @@ namespace TestPTStopLosses
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
         
-        Parser p = null;
+        
         Dictionary<string, CompletedOrders> orderDict = new Dictionary<string, CompletedOrders>();
         public MainWindow()
         {
