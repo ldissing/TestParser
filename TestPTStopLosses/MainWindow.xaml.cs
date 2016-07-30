@@ -137,7 +137,7 @@ namespace DictionaryDataGridDemo
             Results r = new Results();
             //r = ProcessPTSL(4, 4);
             //ProcessPTSL(11, 4);
-            using (StreamWriter sw = new StreamWriter("Results.csv"))
+            using (StreamWriter sw = new StreamWriter(@"c:\results\Results.csv"))
             {
                 sw.WriteLine(r.CSVHeader);
                 for (int j = 4; j <= 16; j += 1)
